@@ -70,6 +70,9 @@ class MainWindow(QMainWindow):
         # Wire Colors menu actions
         self._wire_colors_actions()
 
+        # Wire Image Processing menu actions
+        self._wire_image_processing_actions()
+
     def _display_pixmap_on_left(self, pixmap: QPixmap):
         if pixmap.isNull():
             QMessageBox.warning(self, 'Gagal Membuka', 'Gambar tidak valid atau tidak dapat dimuat.')
@@ -247,6 +250,25 @@ class MainWindow(QMainWindow):
             return
         from processing import ops
         self._apply_and_show(ops.brightness_contrast, brightness=brightness, contrast=contrast)
+
+    def _wire_image_processing_actions(self):
+        from functools import partial
+        from processing import ops
+
+        # Histogram Equalization
+        act_he = self.findChild(QAction, 'actionHistogram_Equalization')
+        if act_he:
+            act_he.triggered.connect(partial(self._apply_and_show, ops.histogram_equalization))
+
+        # Fuzzy HE RGB
+        act_fuzzy_rgb = self.findChild(QAction, 'actionFuzzy_HE_RGB')
+        if act_fuzzy_rgb:
+            act_fuzzy_rgb.triggered.connect(partial(self._apply_and_show, ops.fuzzy_histogram_equalization_rgb))
+
+        # Fuzzy Grayscale
+        act_fuzzy_gray = self.findChild(QAction, 'actionFuzzy_Grayscale')
+        if act_fuzzy_gray:
+            act_fuzzy_gray.triggered.connect(partial(self._apply_and_show, ops.fuzzy_histogram_equalization_grayscale))
 
     def show_tentang(self):
         if self.tentang_window is None:

@@ -27,3 +27,8 @@ from .enhancement import (
     brightness_contrast
 )
 from .bitdepth import bit_depth
+from .histogram import (
+    histogram_equalization,
+    fuzzy_histogram_equalization_rgb,
+    fuzzy_histogram_equalization_grayscale
+)
