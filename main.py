@@ -82,6 +82,9 @@ class MainWindow(QMainWindow):
         # Wire Filter menu actions
         self._wire_filter_actions()
 
+        # Wire standalone Edge Detection menu actions
+        self._wire_edge_detection_actions()
+
     def _display_pixmap_on_left(self, pixmap: QPixmap):
         if pixmap.isNull():
             QMessageBox.warning(self, 'Gagal Membuka', 'Gambar tidak valid atau tidak dapat dimuat.')
@@ -124,7 +127,8 @@ class MainWindow(QMainWindow):
         if self._output_pixmap is None or self._output_pixmap.isNull():
             QMessageBox.information(self, 'Simpan', 'Tidak ada hasil untuk disimpan. Lakukan pemrosesan terlebih dahulu.')
             return
-        file_path, _ = QFileDialog.getSaveFileName(
+
+        file_path, selected_filter = QFileDialog.getSaveFileName(
             self,
             'Simpan Hasil Sebagai',
             '',
@@ -132,10 +136,54 @@ class MainWindow(QMainWindow):
         )
         if not file_path:
             return
-        if not self._output_pixmap.save(file_path):
-            QMessageBox.warning(self, 'Simpan', 'Gagal menyimpan gambar.')
-        else:
-            self.statusBar().showMessage(f'Tersimpan: {os.path.basename(file_path)}', 5000)
+
+        # Ensure file has proper extension based on selected filter
+        if selected_filter.startswith('PNG'):
+            if not file_path.lower().endswith('.png'):
+                file_path += '.png'
+        elif selected_filter.startswith('JPEG'):
+            if not any(file_path.lower().endswith(ext) for ext in ['.jpg', '.jpeg']):
+                file_path += '.jpg'
+        elif selected_filter.startswith('BMP'):
+            if not file_path.lower().endswith('.bmp'):
+                file_path += '.bmp'
+        elif selected_filter.startswith('TIFF'):
+            if not any(file_path.lower().endswith(ext) for ext in ['.tif', '.tiff']):
+                file_path += '.tif'
+
+        # Ensure directory exists
+        directory = os.path.dirname(file_path)
+        if directory and not os.path.exists(directory):
+            try:
+                os.makedirs(directory)
+            except Exception as e:
+                QMessageBox.warning(self, 'Simpan', f'Gagal membuat direktori: {e}')
+                return
+
+        # Try to save with better error handling
+        try:
+            # Ensure pixmap is valid
+            if self._output_pixmap.isNull():
+                QMessageBox.warning(self, 'Simpan', 'Gambar output tidak valid.')
+                return
+
+            # Try to save
+            success = self._output_pixmap.save(file_path)
+
+            if success:
+                self.statusBar().showMessage(f'Tersimpan: {os.path.basename(file_path)}', 5000)
+            else:
+                # Try alternative approach for JPEG
+                if file_path.lower().endswith(('.jpg', '.jpeg')):
+                    # For JPEG, try converting to RGB first if needed
+                    temp_pixmap = self._output_pixmap
+                    success = temp_pixmap.save(file_path, 'JPEG', 95)  # 95% quality
+
+                if not success:
+                    QMessageBox.warning(self, 'Simpan', f'Gagal menyimpan gambar ke: {file_path}\nPeriksa izin file dan direktori.')
+
+        except Exception as e:
+            QMessageBox.warning(self, 'Simpan', f'Error saat menyimpan: {str(e)}')
 
     def _reset_tentang_window(self):
         self.tentang_window = None
@@ -165,6 +213,10 @@ class MainWindow(QMainWindow):
         if out.ndim == 2:
             out = np.stack([out, out, out], axis=2)
         out_pix = numpy_to_pixmap(out)
+        # Ensure pixmap is valid before storing
+        if out_pix.isNull():
+            QMessageBox.warning(self, 'Error', 'Gagal membuat gambar output yang valid.')
+            return
         self._output_pixmap = out_pix
         self._display_pixmap_on_right(out_pix)
 
@@ -346,6 +398,22 @@ class MainWindow(QMainWindow):
         }
 
         for action_name, func in filter_mapping.items():
+            act = self.findChild(QAction, action_name)
+            if act:
+                act.triggered.connect(partial(self._apply_and_show, func))
+
+    def _wire_edge_detection_actions(self):
+        """Wire standalone Edge Detection menu actions"""
+        from functools import partial
+        from processing import ops
+
+        # Standalone Edge Detection mappings
+        edge_detection_mapping = {
+            'actionPrewitt': ops.prewitt,
+            'actionSobel': ops.sobel,
+        }
+
+        for action_name, func in edge_detection_mapping.items():
             act = self.findChild(QAction, action_name)
             if act:
                 act.triggered.connect(partial(self._apply_and_show, func))

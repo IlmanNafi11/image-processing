@@ -44,7 +44,9 @@ from .filters import (
     average_filter,
     low_pass_filter,
     high_pass_filter,
-    bandstop_filter
+    bandstop_filter,
+    prewitt,
+    sobel
 )
 from .arithmetic import (
     add_images,

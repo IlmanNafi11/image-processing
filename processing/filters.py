@@ -176,3 +176,47 @@ def bandstop_filter(img: np.ndarray) -> np.ndarray:
     bandstop = cv2.add(bandstop, 128)
 
     return bandstop
+
+
+def prewitt(img: np.ndarray) -> np.ndarray:
+    """Prewitt edge detection operator"""
+    _ensure_numpy()
+    gray = _to_grayscale_if_needed(img)
+
+    # Prewitt horizontal kernel
+    kernel_x = np.array([[-1, 0, 1],
+                         [-1, 0, 1],
+                         [-1, 0, 1]], dtype=np.float32)
+
+    # Prewitt vertical kernel
+    kernel_y = np.array([[-1, -1, -1],
+                         [0,  0,  0],
+                         [1,  1,  1]], dtype=np.float32)
+
+    edges_x = cv2.filter2D(gray, -1, kernel_x)
+    edges_y = cv2.filter2D(gray, -1, kernel_y)
+    edges = cv2.addWeighted(edges_x, 0.5, edges_y, 0.5, 0)
+
+    return _to_rgb_stack(edges)
+
+
+def sobel(img: np.ndarray) -> np.ndarray:
+    """Sobel edge detection operator"""
+    _ensure_numpy()
+    gray = _to_grayscale_if_needed(img)
+
+    # Sobel horizontal kernel
+    kernel_x = np.array([[-1, 0, 1],
+                         [-2, 0, 2],
+                         [-1, 0, 1]], dtype=np.float32)
+
+    # Sobel vertical kernel
+    kernel_y = np.array([[-1, -2, -1],
+                         [0,  0,  0],
+                         [1,  2,  1]], dtype=np.float32)
+
+    edges_x = cv2.filter2D(gray, -1, kernel_x)
+    edges_y = cv2.filter2D(gray, -1, kernel_y)
+    edges = cv2.addWeighted(edges_x, 0.5, edges_y, 0.5, 0)
+
+    return _to_rgb_stack(edges)
