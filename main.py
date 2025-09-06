@@ -73,6 +73,9 @@ class MainWindow(QMainWindow):
         # Wire Image Processing menu actions
         self._wire_image_processing_actions()
 
+        # Wire View menu actions
+        self._wire_view_actions()
+
     def _display_pixmap_on_left(self, pixmap: QPixmap):
         if pixmap.isNull():
             QMessageBox.warning(self, 'Gagal Membuka', 'Gambar tidak valid atau tidak dapat dimuat.')
@@ -269,6 +272,44 @@ class MainWindow(QMainWindow):
         act_fuzzy_gray = self.findChild(QAction, 'actionFuzzy_Grayscale')
         if act_fuzzy_gray:
             act_fuzzy_gray.triggered.connect(partial(self._apply_and_show, ops.fuzzy_histogram_equalization_grayscale))
+
+    def _wire_view_actions(self):
+        """Wire View menu actions for histogram display"""
+        from processing.qt import show_input_histogram, show_output_histogram, show_input_output_histogram
+
+        # Input Histogram
+        act_input_hist = self.findChild(QAction, 'actionInput')
+        if act_input_hist:
+            act_input_hist.triggered.connect(self._show_input_histogram)
+
+        # Output Histogram
+        act_output_hist = self.findChild(QAction, 'actionOutput')
+        if act_output_hist:
+            act_output_hist.triggered.connect(self._show_output_histogram)
+
+        # Input Output Histogram
+        act_input_output_hist = self.findChild(QAction, 'actionInput_Output')
+        if act_input_output_hist:
+            act_input_output_hist.triggered.connect(self._show_input_output_histogram)
+
+    def _show_input_histogram(self):
+        """Show histogram for input image"""
+        if not self._require_input():
+            return
+        from processing.qt import show_input_histogram
+        show_input_histogram(self._input_pixmap)
+
+    def _show_output_histogram(self):
+        """Show histogram for output image"""
+        from processing.qt import show_output_histogram
+        show_output_histogram(self._output_pixmap)
+
+    def _show_input_output_histogram(self):
+        """Show histograms for both input and output images"""
+        if not self._require_input():
+            return
+        from processing.qt import show_input_output_histogram
+        show_input_output_histogram(self._input_pixmap, self._output_pixmap)
 
     def show_tentang(self):
         if self.tentang_window is None:
