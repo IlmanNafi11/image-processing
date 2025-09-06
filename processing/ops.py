@@ -32,6 +32,20 @@ from .histogram import (
     fuzzy_histogram_equalization_rgb,
     fuzzy_histogram_equalization_grayscale
 )
+from .filters import (
+    identity,
+    edge_detection_1,
+    edge_detection_2,
+    edge_detection_3,
+    sharpen,
+    gaussian_blur_3x3,
+    gaussian_blur_5x5,
+    unsharp_masking,
+    average_filter,
+    low_pass_filter,
+    high_pass_filter,
+    bandstop_filter
+)
 from .arithmetic import (
     add_images,
     add_constant,

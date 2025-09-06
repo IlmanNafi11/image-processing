@@ -79,6 +79,9 @@ class MainWindow(QMainWindow):
         # Wire Arithmetical Operation menu actions
         self._wire_arithmetic_actions()
 
+        # Wire Filter menu actions
+        self._wire_filter_actions()
+
     def _display_pixmap_on_left(self, pixmap: QPixmap):
         if pixmap.isNull():
             QMessageBox.warning(self, 'Gagal Membuka', 'Gambar tidak valid atau tidak dapat dimuat.')
@@ -320,6 +323,32 @@ class MainWindow(QMainWindow):
         arithmetic_menu = self.findChild(QMenu, 'menuAritmatical_Operation')
         if arithmetic_menu:
             arithmetic_menu.aboutToShow.connect(self._on_open_arithmetic_operations)
+
+    def _wire_filter_actions(self):
+        """Wire Filter menu actions"""
+        from functools import partial
+        from processing import ops
+
+        # Filter mappings
+        filter_mapping = {
+            'actionIdentity': ops.identity,
+            'actionSharpen': ops.sharpen,
+            'actionUnsharp_Masking': ops.unsharp_masking,
+            'actionAverage_Filter': ops.average_filter,
+            'actionLow_Pass_Filter': ops.low_pass_filter,
+            'actionHight_Pass_Filter': ops.high_pass_filter,
+            'actionBandstop_Filter': ops.bandstop_filter,
+            'actionEdge_Detection_1': ops.edge_detection_1,
+            'actionEdge_Detection_2': ops.edge_detection_2,
+            'actionEdge_Detection_3': ops.edge_detection_3,
+            'actionGaussian_Blur_3x3': ops.gaussian_blur_3x3,
+            'actionGaussian_Blur_5x5': ops.gaussian_blur_5x5,
+        }
+
+        for action_name, func in filter_mapping.items():
+            act = self.findChild(QAction, action_name)
+            if act:
+                act.triggered.connect(partial(self._apply_and_show, func))
 
     def _on_open_arithmetic_operations(self):
         """Open Arithmetic Operations dialog"""
