@@ -76,6 +76,9 @@ class MainWindow(QMainWindow):
         # Wire View menu actions
         self._wire_view_actions()
 
+        # Wire Arithmetical Operation menu actions
+        self._wire_arithmetic_actions()
+
     def _display_pixmap_on_left(self, pixmap: QPixmap):
         if pixmap.isNull():
             QMessageBox.warning(self, 'Gagal Membuka', 'Gambar tidak valid atau tidak dapat dimuat.')
@@ -310,6 +313,21 @@ class MainWindow(QMainWindow):
             return
         from processing.qt import show_input_output_histogram
         show_input_output_histogram(self._input_pixmap, self._output_pixmap)
+
+    def _wire_arithmetic_actions(self):
+        """Wire Arithmetical Operation menu actions"""
+        # Connect the menu itself to open the dialog
+        arithmetic_menu = self.findChild(QMenu, 'menuAritmatical_Operation')
+        if arithmetic_menu:
+            arithmetic_menu.aboutToShow.connect(self._on_open_arithmetic_operations)
+
+    def _on_open_arithmetic_operations(self):
+        """Open Arithmetic Operations dialog"""
+        from ui.arithmetic_dialog import ArithmeticDialog
+        # Pass the current input image if available, otherwise None
+        input_image = self._input_pixmap if hasattr(self, '_input_pixmap') and self._input_pixmap else None
+        dialog = ArithmeticDialog(self, input_image)
+        dialog.exec_()
 
     def show_tentang(self):
         if self.tentang_window is None:

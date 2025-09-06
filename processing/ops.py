@@ -32,3 +32,18 @@ from .histogram import (
     fuzzy_histogram_equalization_rgb,
     fuzzy_histogram_equalization_grayscale
 )
+from .arithmetic import (
+    add_images,
+    add_constant,
+    subtract_images,
+    subtract_constant,
+    absolute_difference,
+    multiply_images,
+    multiply_constant,
+    divide_images,
+    divide_constant,
+    blend_images,
+    get_second_image,
+    get_constant_value,
+    get_blend_parameters
+)
