@@ -28,10 +28,8 @@ class ArithmeticDialog(QDialog):
         self.pushButtonSaveOutput.clicked.connect(self._save_output)
         self.pushButtonExecute.clicked.connect(self._execute_operation)
         self.comboBoxOperation.currentTextChanged.connect(self._on_operation_changed)
-        self.comboBoxType.currentTextChanged.connect(self._on_type_changed)
 
         self._on_operation_changed()
-        self._on_type_changed()
 
     def _setup_graphics_views(self) -> None:
         self._input1_view = self.graphicsViewInput1
@@ -136,73 +134,48 @@ class ArithmeticDialog(QDialog):
             QMessageBox.warning(self, 'Save', f'Error saving image:\n{str(e)}')
 
     def _on_operation_changed(self):
-        
         operation = self.comboBoxOperation.currentText()
         if operation == "Blend":
-            self.comboBoxType.setCurrentText("Image + Image")
-            self.comboBoxType.setEnabled(False)
             self.doubleSpinBoxAlpha.setEnabled(True)
             self.doubleSpinBoxBeta.setEnabled(True)
-            self.doubleSpinBoxConstant.setEnabled(False)
+            self.groupBoxParameters.setVisible(True)
         else:
-            self.comboBoxType.setEnabled(True)
             self.doubleSpinBoxAlpha.setEnabled(False)
             self.doubleSpinBoxBeta.setEnabled(False)
-            self._on_type_changed()
-
-    def _on_type_changed(self):
-        
-        operation_type = self.comboBoxType.currentText()
-        if operation_type == "Image + Constant":
-            self.doubleSpinBoxConstant.setEnabled(True)
-        else:
-            self.doubleSpinBoxConstant.setEnabled(False)
+            self.groupBoxParameters.setVisible(False)
 
     def _execute_operation(self):
-        
         if self._input1_pixmap is None:
             QMessageBox.warning(self, 'Error', 'Please load Input 1 image.')
             return
+        
+        if self._input2_pixmap is None:
+            QMessageBox.warning(self, 'Error', 'Please load Input 2 image.')
+            return
 
         operation = self.comboBoxOperation.currentText()
-        operation_type = self.comboBoxType.currentText()
 
         try:
-            if operation_type == "Image + Image":
-                if self._input2_pixmap is None:
-                    QMessageBox.warning(self, 'Error', 'Please load Input 2 image for image-to-image operations.')
-                    return
+            input1_arr = pixmap_to_numpy(self._input1_pixmap)
+            input2_arr = pixmap_to_numpy(self._input2_pixmap)
 
-                input1_arr = pixmap_to_numpy(self._input1_pixmap)
-                input2_arr = pixmap_to_numpy(self._input2_pixmap)
-
-                if operation == "Add":
-                    result = ops.add_images(input1_arr, input2_arr)
-                elif operation == "Subtract":
-                    result = ops.subtract_images(input1_arr, input2_arr)
-                elif operation == "Multiply":
-                    result = ops.multiply_images(input1_arr, input2_arr)
-                elif operation == "Divide":
-                    result = ops.divide_images(input1_arr, input2_arr)
-                elif operation == "Absolute Difference":
-                    result = ops.absolute_difference(input1_arr, input2_arr)
-                elif operation == "Blend":
-                    alpha = self.doubleSpinBoxAlpha.value()
-                    beta = self.doubleSpinBoxBeta.value()
-                    result = ops.blend_images(input1_arr, input2_arr, alpha, beta)
-
+            if operation == "Add":
+                result = ops.add_images(input1_arr, input2_arr)
+            elif operation == "Subtract":
+                result = ops.subtract_images(input1_arr, input2_arr)
+            elif operation == "Multiply":
+                result = ops.multiply_images(input1_arr, input2_arr)
+            elif operation == "Divide":
+                result = ops.divide_images(input1_arr, input2_arr)
+            elif operation == "Absolute Difference":
+                result = ops.absolute_difference(input1_arr, input2_arr)
+            elif operation == "Blend":
+                alpha = self.doubleSpinBoxAlpha.value()
+                beta = self.doubleSpinBoxBeta.value()
+                result = ops.blend_images(input1_arr, input2_arr, alpha, beta)
             else:
-                input1_arr = pixmap_to_numpy(self._input1_pixmap)
-                constant = self.doubleSpinBoxConstant.value()
-
-                if operation == "Add":
-                    result = ops.add_constant(input1_arr, constant)
-                elif operation == "Subtract":
-                    result = ops.subtract_constant(input1_arr, constant)
-                elif operation == "Multiply":
-                    result = ops.multiply_constant(input1_arr, constant)
-                elif operation == "Divide":
-                    result = ops.divide_constant(input1_arr, constant)
+                QMessageBox.warning(self, 'Error', f'Unknown operation: {operation}')
+                return
 
             result_pixmap = numpy_to_pixmap(result)
             self._output_pixmap = result_pixmap

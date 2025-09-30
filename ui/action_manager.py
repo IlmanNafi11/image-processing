@@ -62,6 +62,17 @@ class ActionManager(BaseManager):
             'actionPrewitt': ops.prewitt,
             'actionSobel': ops.sobel,
         }
+        
+        self._morphology_actions = {
+            'actionSquare_3': ops.erosion_square_3,
+            'actionSquare_5': ops.erosion_square_5,
+            'actionCross_3': ops.erosion_cross_3,
+            'actionSquare_4': ops.dilation_square_3,
+            'actionSquare_6': ops.dilation_square_5,
+            'actionCross_4': ops.dilation_cross_3,
+            'actionSquare_9': ops.opening_square_9,
+            'actionSquare_10': ops.closing_square_9,
+        }
     
     def connect_all_actions(self) -> None:
         
@@ -70,6 +81,7 @@ class ActionManager(BaseManager):
         self._connect_processing_actions()
         self._connect_filter_actions()
         self._connect_edge_detection_actions()
+        self._connect_morphology_actions()
         self._connect_parameterized_actions()
         self._connect_bit_depth_actions()
     
@@ -96,6 +108,11 @@ class ActionManager(BaseManager):
     def _connect_edge_detection_actions(self) -> None:
         
         for action_name, func in self._edge_detection_actions.items():
+            self._connect_simple_action(action_name, func)
+    
+    def _connect_morphology_actions(self) -> None:
+        
+        for action_name, func in self._morphology_actions.items():
             self._connect_simple_action(action_name, func)
     
     def _connect_simple_action(self, action_name: str, func: Callable) -> None:

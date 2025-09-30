@@ -1,1 +1,1 @@
-from . import ops, qt, utils, colors, enhancement, bitdepth, filters
+from . import ops, qt, utils, colors, enhancement, bitdepth, filters, morphology

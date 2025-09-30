@@ -54,3 +54,13 @@ from .arithmetic import (
     divide_constant,
     blend_images
 )
+from .morphology import (
+    erosion_square_3,
+    erosion_square_5,
+    erosion_cross_3,
+    dilation_square_3,
+    dilation_square_5,
+    dilation_cross_3,
+    opening_square_9,
+    closing_square_9
+)
