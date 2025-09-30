@@ -1,0 +1,24 @@
+{
+  "window": {
+    "width": 1200,
+    "height": 800,
+    "maximized": false
+  },
+  "files": {
+    "last_directory": "/home/ilmannafi/Pictures/Screenshots",
+    "recent_files": [
+      "/home/ilmannafi/Pictures/Screenshots/Screenshot from 2025-09-25 15-43-50.png"
+    ],
+    "max_recent_files": 10
+  },
+  "processing": {
+    "default_gamma": 1.0,
+    "default_contrast": 1.2,
+    "default_brightness": 0
+  },
+  "ui": {
+    "show_tooltips": true,
+    "show_status_messages": true,
+    "auto_fit_images": true
+  }
+}

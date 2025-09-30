@@ -9,41 +9,20 @@ from processing import ops
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 UI_DIR = os.path.join(BASE_DIR, 'ui')
 
-
 class ArithmeticDialog(QDialog):
     def __init__(self, parent=None, input_image=None):
         super().__init__(parent)
         uic.loadUi(os.path.join(UI_DIR, 'ArithmeticDialog.ui'), self)
 
-        # Setup graphics views
-        self._input1_scene = QGraphicsScene(self.graphicsViewInput1)
-        self.graphicsViewInput1.setScene(self._input1_scene)
-        self.graphicsViewInput1.setRenderHints(self.graphicsViewInput1.renderHints() |
-                                              QPainter.Antialiasing |
-                                              QPainter.SmoothPixmapTransform)
+        self._setup_graphics_views()
 
-        self._input2_scene = QGraphicsScene(self.graphicsViewInput2)
-        self.graphicsViewInput2.setScene(self._input2_scene)
-        self.graphicsViewInput2.setRenderHints(self.graphicsViewInput2.renderHints() |
-                                              QPainter.Antialiasing |
-                                              QPainter.SmoothPixmapTransform)
-
-        self._output_scene = QGraphicsScene(self.graphicsViewOutput)
-        self.graphicsViewOutput.setScene(self._output_scene)
-        self.graphicsViewOutput.setRenderHints(self.graphicsViewOutput.renderHints() |
-                                              QPainter.Antialiasing |
-                                              QPainter.SmoothPixmapTransform)
-
-        # Internal state
         self._input1_pixmap = input_image
         self._input2_pixmap = None
         self._output_pixmap = None
 
-        # Load initial image if provided
         if input_image:
-            self._display_pixmap_on_input1(input_image)
+            self._input1_view.display_pixmap(input_image)
 
-        # Connect signals
         self.pushButtonLoadInput1.clicked.connect(self._load_input1)
         self.pushButtonLoadInput2.clicked.connect(self._load_input2)
         self.pushButtonSaveOutput.clicked.connect(self._save_output)
@@ -51,39 +30,43 @@ class ArithmeticDialog(QDialog):
         self.comboBoxOperation.currentTextChanged.connect(self._on_operation_changed)
         self.comboBoxType.currentTextChanged.connect(self._on_type_changed)
 
-        # Initialize UI state
         self._on_operation_changed()
         self._on_type_changed()
 
-    def _display_pixmap_on_input1(self, pixmap: QPixmap):
-        """Display pixmap on input 1 graphics view"""
-        if pixmap.isNull():
-            return
-        self._input1_scene.clear()
-        item = self._input1_scene.addPixmap(pixmap)
-        self._input1_scene.setSceneRect(QRectF(pixmap.rect()))
-        self.graphicsViewInput1.fitInView(item, Qt.KeepAspectRatio)
-
-    def _display_pixmap_on_input2(self, pixmap: QPixmap):
-        """Display pixmap on input 2 graphics view"""
-        if pixmap.isNull():
-            return
-        self._input2_scene.clear()
-        item = self._input2_scene.addPixmap(pixmap)
-        self._input2_scene.setSceneRect(QRectF(pixmap.rect()))
-        self.graphicsViewInput2.fitInView(item, Qt.KeepAspectRatio)
-
-    def _display_pixmap_on_output(self, pixmap: QPixmap):
-        """Display pixmap on output graphics view"""
-        if pixmap.isNull():
-            return
-        self._output_scene.clear()
-        item = self._output_scene.addPixmap(pixmap)
-        self._output_scene.setSceneRect(QRectF(pixmap.rect()))
-        self.graphicsViewOutput.fitInView(item, Qt.KeepAspectRatio)
+    def _setup_graphics_views(self) -> None:
+        self._input1_view = self.graphicsViewInput1
+        self._input2_view = self.graphicsViewInput2
+        self._output_view = self.graphicsViewOutput
+        
+        for view in [self._input1_view, self._input2_view, self._output_view]:
+            view.setRenderHints(view.renderHints() | 
+                              QPainter.Antialiasing | 
+                              QPainter.SmoothPixmapTransform)
+            
+            scene = QGraphicsScene(view)
+            view.setScene(scene)
+            view._scene = scene
+            view._current_pixmap = None
+            
+            self._add_view_methods(view)
+    
+    def _add_view_methods(self, view):
+        def display_pixmap(pixmap):
+            if pixmap.isNull():
+                return
+            view._scene.clear()
+            item = view._scene.addPixmap(pixmap)
+            view._scene.setSceneRect(QRectF(pixmap.rect()))
+            view.fitInView(item, Qt.KeepAspectRatio)
+            view._current_pixmap = pixmap
+        
+        def has_image():
+            return view._current_pixmap is not None and not view._current_pixmap.isNull()
+        
+        view.display_pixmap = display_pixmap
+        view.has_image = has_image
 
     def _load_input1(self):
-        """Load image for input 1"""
         file_path, _ = QFileDialog.getOpenFileName(
             self,
             'Load Input 1 Image',
@@ -97,10 +80,9 @@ class ArithmeticDialog(QDialog):
             QMessageBox.warning(self, 'Error', 'Cannot load the selected image.')
             return
         self._input1_pixmap = pixmap
-        self._display_pixmap_on_input1(pixmap)
+        self._input1_view.display_pixmap(pixmap)
 
     def _load_input2(self):
-        """Load image for input 2"""
         file_path, _ = QFileDialog.getOpenFileName(
             self,
             'Load Input 2 Image',
@@ -114,10 +96,10 @@ class ArithmeticDialog(QDialog):
             QMessageBox.warning(self, 'Error', 'Cannot load the selected image.')
             return
         self._input2_pixmap = pixmap
-        self._display_pixmap_on_input2(pixmap)
+        self._input2_view.display_pixmap(pixmap)
 
     def _save_output(self):
-        """Save output image"""
+        
         if self._output_pixmap is None or self._output_pixmap.isNull():
             QMessageBox.information(self, 'Save', 'No output image to save.')
             return
@@ -132,7 +114,6 @@ class ArithmeticDialog(QDialog):
         if not file_path:
             return
 
-        # Ensure file has proper extension based on selected filter
         if selected_filter.startswith('PNG'):
             if not file_path.lower().endswith('.png'):
                 file_path += '.png'
@@ -144,7 +125,7 @@ class ArithmeticDialog(QDialog):
                 file_path += '.bmp'
         elif selected_filter.startswith('TIFF'):
             if not any(file_path.lower().endswith(ext) for ext in ['.tif', '.tiff']):
-                file_path += '.png'  # Default to PNG if no extension
+                file_path += '.png'
 
         try:
             if self._output_pixmap.save(file_path):
@@ -155,7 +136,7 @@ class ArithmeticDialog(QDialog):
             QMessageBox.warning(self, 'Save', f'Error saving image:\n{str(e)}')
 
     def _on_operation_changed(self):
-        """Handle operation combo box change"""
+        
         operation = self.comboBoxOperation.currentText()
         if operation == "Blend":
             self.comboBoxType.setCurrentText("Image + Image")
@@ -170,7 +151,7 @@ class ArithmeticDialog(QDialog):
             self._on_type_changed()
 
     def _on_type_changed(self):
-        """Handle type combo box change"""
+        
         operation_type = self.comboBoxType.currentText()
         if operation_type == "Image + Constant":
             self.doubleSpinBoxConstant.setEnabled(True)
@@ -178,7 +159,7 @@ class ArithmeticDialog(QDialog):
             self.doubleSpinBoxConstant.setEnabled(False)
 
     def _execute_operation(self):
-        """Execute the selected arithmetic operation"""
+        
         if self._input1_pixmap is None:
             QMessageBox.warning(self, 'Error', 'Please load Input 1 image.')
             return
@@ -210,7 +191,7 @@ class ArithmeticDialog(QDialog):
                     beta = self.doubleSpinBoxBeta.value()
                     result = ops.blend_images(input1_arr, input2_arr, alpha, beta)
 
-            else:  # Image + Constant
+            else:
                 input1_arr = pixmap_to_numpy(self._input1_pixmap)
                 constant = self.doubleSpinBoxConstant.value()
 
@@ -223,21 +204,18 @@ class ArithmeticDialog(QDialog):
                 elif operation == "Divide":
                     result = ops.divide_constant(input1_arr, constant)
 
-            # Convert result back to pixmap and display
             result_pixmap = numpy_to_pixmap(result)
             self._output_pixmap = result_pixmap
-            self._display_pixmap_on_output(result_pixmap)
+            self._output_view.display_pixmap(result_pixmap)
 
         except Exception as e:
             QMessageBox.warning(self, 'Error', f'Operation failed: {str(e)}')
 
     def resizeEvent(self, event):
-        """Handle window resize to keep images fitted"""
         super().resizeEvent(event)
-        # Keep the displayed images fitted when the window resizes
-        if self._input1_scene and not self._input1_scene.items() == []:
-            self.graphicsViewInput1.fitInView(self._input1_scene.itemsBoundingRect(), Qt.KeepAspectRatio)
-        if self._input2_scene and not self._input2_scene.items() == []:
-            self.graphicsViewInput2.fitInView(self._input2_scene.itemsBoundingRect(), Qt.KeepAspectRatio)
-        if self._output_scene and not self._output_scene.items() == []:
-            self.graphicsViewOutput.fitInView(self._output_scene.itemsBoundingRect(), Qt.KeepAspectRatio)
+        if self._input1_view.has_image():
+            self._input1_view.fitInView(self._input1_view._scene.itemsBoundingRect(), Qt.KeepAspectRatio)
+        if self._input2_view.has_image():
+            self._input2_view.fitInView(self._input2_view._scene.itemsBoundingRect(), Qt.KeepAspectRatio)
+        if self._output_view.has_image():
+            self._output_view.fitInView(self._output_view._scene.itemsBoundingRect(), Qt.KeepAspectRatio)

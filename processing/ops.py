@@ -1,13 +1,7 @@
 import numpy as np
 
-# Core image ops expect uint8 arrays.
-# Channel order for inputs/outputs is RGB (not BGR).
-
-# Import utility functions
 from .utils import _ensure_numpy, _pil_to_numpy, _numpy_to_pil
 
-
-# Import functions from specialized modules to maintain clean separation of concerns
 from .colors import (
     to_grayscale_average,
     to_grayscale_lightness,
@@ -58,8 +52,5 @@ from .arithmetic import (
     multiply_constant,
     divide_images,
     divide_constant,
-    blend_images,
-    get_second_image,
-    get_constant_value,
-    get_blend_parameters
+    blend_images
 )
