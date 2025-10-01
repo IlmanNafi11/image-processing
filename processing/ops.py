@@ -47,12 +47,10 @@ from .arithmetic import (
     add_constant,
     subtract_images,
     subtract_constant,
-    absolute_difference,
     multiply_images,
     multiply_constant,
     divide_images,
-    divide_constant,
-    blend_images
+    divide_constant
 )
 from .morphology import (
     erosion_square_3,

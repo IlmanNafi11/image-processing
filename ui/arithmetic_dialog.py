@@ -135,14 +135,10 @@ class ArithmeticDialog(QDialog):
 
     def _on_operation_changed(self):
         operation = self.comboBoxOperation.currentText()
-        if operation == "Blend":
-            self.doubleSpinBoxAlpha.setEnabled(True)
-            self.doubleSpinBoxBeta.setEnabled(True)
-            self.groupBoxParameters.setVisible(True)
-        else:
-            self.doubleSpinBoxAlpha.setEnabled(False)
-            self.doubleSpinBoxBeta.setEnabled(False)
-            self.groupBoxParameters.setVisible(False)
+        # All operations are binary operations between two images, no parameters needed
+        self.doubleSpinBoxAlpha.setEnabled(False)
+        self.doubleSpinBoxBeta.setEnabled(False)
+        self.groupBoxParameters.setVisible(False)
 
     def _execute_operation(self):
         if self._input1_pixmap is None:
@@ -167,12 +163,6 @@ class ArithmeticDialog(QDialog):
                 result = ops.multiply_images(input1_arr, input2_arr)
             elif operation == "Divide":
                 result = ops.divide_images(input1_arr, input2_arr)
-            elif operation == "Absolute Difference":
-                result = ops.absolute_difference(input1_arr, input2_arr)
-            elif operation == "Blend":
-                alpha = self.doubleSpinBoxAlpha.value()
-                beta = self.doubleSpinBoxBeta.value()
-                result = ops.blend_images(input1_arr, input2_arr, alpha, beta)
             else:
                 QMessageBox.warning(self, 'Error', f'Unknown operation: {operation}')
                 return

@@ -24,8 +24,6 @@ def subtract_images(img1: np.ndarray, img2: np.ndarray) -> np.ndarray:
 def subtract_constant(img: np.ndarray, constant: float) -> np.ndarray:
     return _apply_constant_operation(img, constant, lambda a, c: a - c)
 
-def absolute_difference(img1: np.ndarray, img2: np.ndarray) -> np.ndarray:
-    return _apply_binary_operation(img1, img2, lambda a, b: np.abs(a - b))
 
 def multiply_images(img1: np.ndarray, img2: np.ndarray) -> np.ndarray:
     return _apply_binary_operation(img1, img2, lambda a, b: a * b / 255.0)
@@ -45,8 +43,6 @@ def divide_constant(img: np.ndarray, constant: float) -> np.ndarray:
         raise ValueError("Cannot divide by zero")
     return _apply_constant_operation(img, constant, lambda a, c: a / c)
 
-def blend_images(img1: np.ndarray, img2: np.ndarray, alpha: float, beta: float) -> np.ndarray:
-    return _apply_binary_operation(img1, img2, lambda a, b: alpha * a + beta * b)
 
 def resize_image_to_match(img: np.ndarray, target_shape: tuple) -> np.ndarray:
     

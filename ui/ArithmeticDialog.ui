@@ -159,16 +159,6 @@
             <string>Divide</string>
            </property>
           </item>
-          <item>
-           <property name="text">
-            <string>Absolute Difference</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Blend</string>
-           </property>
-          </item>
          </widget>
         </item>
        </layout>
@@ -177,7 +167,7 @@
      <item>
       <widget class="QGroupBox" name="groupBoxParameters">
        <property name="title">
-        <string>Blend Parameters</string>
+        <string>Parameters</string>
        </property>
        <layout class="QFormLayout" name="formLayout">
         <item row="0" column="0">
