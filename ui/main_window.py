@@ -1,6 +1,6 @@
 import sys
 import os
-from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QAction, QMenu, QGraphicsScene
+from PyQt5.QtWidgets import QApplication, QMainWindow, QWidget, QAction, QMenu, QGraphicsScene, QInputDialog, QMessageBox
 from PyQt5.QtGui import QPainter
 from PyQt5.QtCore import Qt, QRectF
 from PyQt5 import uic
@@ -13,6 +13,7 @@ from .image_processor import ImageProcessor
 from .error_handler import ErrorHandler
 from config.settings import ConfigManager
 from processing.qt import show_input_histogram, show_output_histogram, show_input_output_histogram
+from processing import ops
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 UI_DIR = os.path.join(BASE_DIR, 'ui')
@@ -139,6 +140,40 @@ class MainWindow(QMainWindow):
         input_output_hist_action = self.findChild(QAction, 'actionInput_Output')
         if input_output_hist_action:
             input_output_hist_action.triggered.connect(self._show_input_output_histogram)
+        
+        view_menu = self.findChild(QMenu, 'menuView')
+        if view_menu:
+            flip_horizontal_action = QAction('Flip Horizontal', self)
+            flip_horizontal_action.triggered.connect(self._flip_horizontal)
+            view_menu.addAction(flip_horizontal_action)
+            
+            flip_vertical_action = QAction('Flip Vertikal', self)
+            flip_vertical_action.triggered.connect(self._flip_vertical)
+            view_menu.addAction(flip_vertical_action)
+            
+            rotate_action = QAction('Rotate', self)
+            rotate_action.triggered.connect(self._rotate)
+            view_menu.addAction(rotate_action)
+            
+            translate_action = QAction('Translate', self)
+            translate_action.triggered.connect(self._translate)
+            view_menu.addAction(translate_action)
+            
+            zoom_in_action = QAction('Zoom In', self)
+            zoom_in_action.triggered.connect(self._zoom_in)
+            view_menu.addAction(zoom_in_action)
+            
+            zoom_out_action = QAction('Zoom Out', self)
+            zoom_out_action.triggered.connect(self._zoom_out)
+            view_menu.addAction(zoom_out_action)
+            
+            crop_action = QAction('Crop', self)
+            crop_action.triggered.connect(self._crop)
+            view_menu.addAction(crop_action)
+            
+            remove_bg_action = QAction('Remove Background', self)
+            remove_bg_action.triggered.connect(self._remove_background)
+            view_menu.addAction(remove_bg_action)
     
     def _setup_arithmetic_actions(self) -> None:
         
@@ -227,6 +262,110 @@ class MainWindow(QMainWindow):
         
         output_pixmap = self._scene_manager.get_output_pixmap()
         show_input_output_histogram(input_pixmap, output_pixmap)
+    
+    def _flip_horizontal(self) -> None:
+        
+        self._image_processor.process_image(ops.flip_horizontal)
+    
+    def _flip_vertical(self) -> None:
+        
+        self._image_processor.process_image(ops.flip_vertical)
+    
+    def _rotate(self) -> None:
+        
+        angle, ok = QInputDialog.getDouble(
+            self,
+            'Rotate',
+            'Angle (degrees, positive = counter-clockwise):',
+            0.0, -360.0, 360.0, 1
+        )
+        if ok:
+            self._image_processor.process_image(ops.rotate, angle=angle)
+    
+    def _translate(self) -> None:
+        
+        tx, ok1 = QInputDialog.getInt(
+            self,
+            'Translate',
+            'Horizontal shift (tx, positive = right):',
+            0, -1000, 1000, 1
+        )
+        if not ok1:
+            return
+        
+        ty, ok2 = QInputDialog.getInt(
+            self,
+            'Translate',
+            'Vertical shift (ty, positive = down):',
+            0, -1000, 1000, 1
+        )
+        if ok2:
+            self._image_processor.process_image(ops.translate, tx=tx, ty=ty)
+    
+    def _zoom_in(self) -> None:
+        
+        self._image_processor.process_image_cumulative(ops.zoom, scale_factor=1.25)
+    
+    def _zoom_out(self) -> None:
+        
+        self._image_processor.process_image_cumulative(ops.zoom, scale_factor=0.8)
+    
+    def _crop(self) -> None:
+        
+        input_pixmap = self._scene_manager.get_input_pixmap()
+        
+        if not input_pixmap:
+            self._error_handler.show_info(
+                'Crop',
+                'No input image available. Please load an image first.'
+            )
+            return
+        
+        from .crop_dialog import CropDialog
+        
+        dialog = CropDialog(input_pixmap, self)
+        
+        if dialog.exec_() == CropDialog.Accepted:
+            crop_rect = dialog.get_crop_rect()
+            
+            if crop_rect:
+                x = int(crop_rect.x())
+                y = int(crop_rect.y())
+                width = int(crop_rect.width())
+                height = int(crop_rect.height())
+                
+                self._image_processor.process_image(
+                    ops.crop, 
+                    x=x, y=y, width=width, height=height
+                )
+    
+    def _remove_background(self) -> None:
+        
+        input_pixmap = self._scene_manager.get_input_pixmap()
+        
+        if not input_pixmap:
+            self._error_handler.show_info(
+                'Remove Background',
+                'No input image available. Please load an image first.'
+            )
+            return
+        
+        self.statusBar().showMessage('Removing background... Please wait...')
+        QApplication.processEvents()
+        
+        try:
+            result = self._image_processor.process_image(ops.remove_background)
+            
+            if result.success:
+                self.statusBar().showMessage('Background removed successfully', 3000)
+            else:
+                self.statusBar().showMessage(f'Failed: {result.error_message}', 5000)
+        except Exception as e:
+            self._error_handler.show_error(
+                'Remove Background Error',
+                f'An error occurred while removing background:\n{str(e)}'
+            )
+            self.statusBar().showMessage('Remove background failed', 3000)
     
     def _open_arithmetic_operations(self) -> None:
         

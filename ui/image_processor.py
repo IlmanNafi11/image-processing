@@ -66,3 +66,40 @@ class ImageProcessor(BaseManager):
     def has_output_image(self) -> bool:
         
         return self._scene_manager.has_output_image()
+    
+    def process_image_cumulative(self, processing_func: Callable, *args, **kwargs) -> ImageOperationResult:
+        
+        
+        output_pixmap = self._scene_manager.get_output_pixmap()
+        if output_pixmap and not output_pixmap.isNull():
+            source_pixmap = output_pixmap
+        else:
+            source_pixmap = self._scene_manager.get_input_pixmap()
+        
+        if not source_pixmap or source_pixmap.isNull():
+            error_msg = "No image available. Please load an image first."
+            self._report_error('Processing Error', error_msg)
+            return ImageOperationResult.error_result(error_msg)
+        
+        try:
+            source_array = pixmap_to_numpy(source_pixmap)
+            
+            output_array = processing_func(source_array, *args, **kwargs)
+            
+            output_array = self._ensure_valid_output(output_array)
+            
+            output_pixmap = numpy_to_pixmap(output_array)
+            
+            if output_pixmap.isNull():
+                error_msg = "Failed to create valid output image."
+                self._report_error('Processing Error', error_msg)
+                return ImageOperationResult.error_result(error_msg)
+            
+            self._scene_manager.display_output_image(output_pixmap)
+            
+            return ImageOperationResult.success_result(output_pixmap)
+            
+        except Exception as e:
+            error_msg = f"Image processing failed: {str(e)}"
+            self._report_error('Processing Error', error_msg)
+            return ImageOperationResult.error_result(error_msg)

@@ -40,7 +40,14 @@ from .filters import (
     high_pass_filter,
     bandstop_filter,
     prewitt,
-    sobel
+    sobel,
+    flip_horizontal,
+    flip_vertical,
+    rotate,
+    translate,
+    zoom,
+    crop,
+    remove_background
 )
 from .arithmetic import (
     add_images,
