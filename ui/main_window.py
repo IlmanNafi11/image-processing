@@ -59,7 +59,8 @@ class MainWindow(QMainWindow):
         self._setup_basic_actions()
         self._setup_view_actions()
         self._setup_arithmetic_actions()
-        
+        self._setup_segmentation_actions()
+
         self._action_manager.connect_all_actions()
         
         self._tentang_window = None
@@ -176,10 +177,39 @@ class MainWindow(QMainWindow):
             view_menu.addAction(remove_bg_action)
     
     def _setup_arithmetic_actions(self) -> None:
-        
+
         arithmetic_menu = self.findChild(QMenu, 'menuAritmatical_Operation')
         if arithmetic_menu:
             arithmetic_menu.aboutToShow.connect(self._open_arithmetic_operations)
+
+    def _setup_segmentation_actions(self) -> None:
+
+        segmentation_menu = QMenu('Segmentasi', self)
+        self.menuBar().addMenu(segmentation_menu)
+
+        global_thresh_action = QAction('Global Thresholding', self)
+        global_thresh_action.triggered.connect(self._global_thresholding)
+        segmentation_menu.addAction(global_thresh_action)
+
+        adaptive_thresh_action = QAction('Adaptive Thresholding', self)
+        adaptive_thresh_action.triggered.connect(self._adaptive_thresholding)
+        segmentation_menu.addAction(adaptive_thresh_action)
+
+        kmeans_action = QAction('K Means', self)
+        kmeans_action.triggered.connect(self._kmeans_segmentation)
+        segmentation_menu.addAction(kmeans_action)
+
+        watershed_action = QAction('Watershed', self)
+        watershed_action.triggered.connect(self._watershed_segmentation)
+        segmentation_menu.addAction(watershed_action)
+
+        region_growing_action = QAction('Region Growing', self)
+        region_growing_action.triggered.connect(self._region_growing_segmentation)
+        segmentation_menu.addAction(region_growing_action)
+
+        view_all_action = QAction('View All Segmentations', self)
+        view_all_action.triggered.connect(self._view_all_segmentations)
+        segmentation_menu.addAction(view_all_action)
     
     def _open_image(self) -> None:
         
@@ -408,8 +438,36 @@ class MainWindow(QMainWindow):
         if hasattr(self, '_scene_manager'):
             self._scene_manager.fit_images_to_view()
     
+    def _global_thresholding(self) -> None:
+
+        self._image_processor.process_image(ops.global_thresholding)
+
+    def _adaptive_thresholding(self) -> None:
+
+        self._image_processor.process_image(ops.adaptive_thresholding)
+
+    def _kmeans_segmentation(self) -> None:
+
+        self._image_processor.process_image(ops.kmeans_segmentation)
+
+    def _watershed_segmentation(self) -> None:
+
+        self._image_processor.process_image(ops.watershed_segmentation)
+
+    def _region_growing_segmentation(self) -> None:
+
+        self._image_processor.process_image(ops.region_growing_segmentation)
+
+    def _view_all_segmentations(self) -> None:
+
+        from .segmentation_dialog import SegmentationDialog
+
+        input_pixmap = self._scene_manager.get_input_pixmap()
+        dialog = SegmentationDialog(input_pixmap, self)
+        dialog.exec_()
+
     def closeEvent(self, event) -> None:
-        
+
         self._config.set_window_config(
             self.width(),
             self.height(),

@@ -43,6 +43,21 @@ def divide_constant(img: np.ndarray, constant: float) -> np.ndarray:
         raise ValueError("Cannot divide by zero")
     return _apply_constant_operation(img, constant, lambda a, c: a / c)
 
+def bitwise_and_images(img1: np.ndarray, img2: np.ndarray) -> np.ndarray:
+    _ensure_numpy()
+    img1, img2 = ensure_same_dimensions(img1, img2)
+    return np.bitwise_and(img1.astype(np.uint8), img2.astype(np.uint8))
+
+def bitwise_or_images(img1: np.ndarray, img2: np.ndarray) -> np.ndarray:
+    _ensure_numpy()
+    img1, img2 = ensure_same_dimensions(img1, img2)
+    return np.bitwise_or(img1.astype(np.uint8), img2.astype(np.uint8))
+
+def bitwise_xor_images(img1: np.ndarray, img2: np.ndarray) -> np.ndarray:
+    _ensure_numpy()
+    img1, img2 = ensure_same_dimensions(img1, img2)
+    return np.bitwise_xor(img1.astype(np.uint8), img2.astype(np.uint8))
+
 
 def resize_image_to_match(img: np.ndarray, target_shape: tuple) -> np.ndarray:
     

@@ -28,9 +28,7 @@ from .histogram import (
 )
 from .filters import (
     identity,
-    edge_detection_1,
-    edge_detection_2,
-    edge_detection_3,
+    canny,
     sharpen,
     gaussian_blur_3x3,
     gaussian_blur_5x5,
@@ -57,7 +55,10 @@ from .arithmetic import (
     multiply_images,
     multiply_constant,
     divide_images,
-    divide_constant
+    divide_constant,
+    bitwise_and_images,
+    bitwise_or_images,
+    bitwise_xor_images
 )
 from .morphology import (
     erosion_square_3,
@@ -68,4 +69,11 @@ from .morphology import (
     dilation_cross_3,
     opening_square_9,
     closing_square_9
+)
+from .segmentation import (
+    global_thresholding,
+    adaptive_thresholding,
+    kmeans_segmentation,
+    watershed_segmentation,
+    region_growing_segmentation
 )

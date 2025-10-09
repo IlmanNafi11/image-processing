@@ -25,15 +25,7 @@ def _to_rgb_stack(gray_img: np.ndarray) -> np.ndarray:
     
     return np.stack([gray_img, gray_img, gray_img], axis=2)
 
-def edge_detection_1(img: np.ndarray) -> np.ndarray:
-    
-    return prewitt(img)
-
-def edge_detection_2(img: np.ndarray) -> np.ndarray:
-    
-    return sobel(img)
-
-def edge_detection_3(img: np.ndarray) -> np.ndarray:
+def canny(img: np.ndarray) -> np.ndarray:
 
     _ensure_numpy()
     gray = _to_grayscale_if_needed(img)

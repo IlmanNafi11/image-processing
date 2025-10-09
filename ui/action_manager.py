@@ -51,18 +51,13 @@ class ActionManager(BaseManager):
             'actionLow_Pass_Filter': ops.low_pass_filter,
             'actionHight_Pass_Filter': ops.high_pass_filter,
             'actionBandstop_Filter': ops.bandstop_filter,
-            'actionEdge_Detection_1': ops.edge_detection_1,
-            'actionEdge_Detection_2': ops.edge_detection_2,
-            'actionEdge_Detection_3': ops.edge_detection_3,
+            'actionEdge_Detection_1': ops.sobel,
+            'actionEdge_Detection_2': ops.prewitt,
+            'actionEdge_Detection_3': ops.canny,
             'actionGaussian_Blur_3x3': ops.gaussian_blur_3x3,
             'actionGaussian_Blur_5x5': ops.gaussian_blur_5x5,
         }
-        
-        self._edge_detection_actions = {
-            'actionPrewitt': ops.prewitt,
-            'actionSobel': ops.sobel,
-        }
-        
+
         self._morphology_actions = {
             'actionSquare_3': ops.erosion_square_3,
             'actionSquare_5': ops.erosion_square_5,
@@ -80,7 +75,6 @@ class ActionManager(BaseManager):
         self._connect_grayscale_actions()
         self._connect_processing_actions()
         self._connect_filter_actions()
-        self._connect_edge_detection_actions()
         self._connect_morphology_actions()
         self._connect_parameterized_actions()
         self._connect_bit_depth_actions()
@@ -103,11 +97,6 @@ class ActionManager(BaseManager):
     def _connect_filter_actions(self) -> None:
         
         for action_name, func in self._filter_actions.items():
-            self._connect_simple_action(action_name, func)
-    
-    def _connect_edge_detection_actions(self) -> None:
-        
-        for action_name, func in self._edge_detection_actions.items():
             self._connect_simple_action(action_name, func)
     
     def _connect_morphology_actions(self) -> None:

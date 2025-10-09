@@ -194,13 +194,6 @@
     <addaction name="actionHight_Pass_Filter"/>
     <addaction name="actionBandstop_Filter"/>
    </widget>
-   <widget class="QMenu" name="menuEdge_Detection_2">
-    <property name="title">
-     <string>Edge Detection</string>
-    </property>
-    <addaction name="actionPrewitt"/>
-    <addaction name="actionSobel"/>
-   </widget>
    <widget class="QMenu" name="menuMorfologi">
     <property name="title">
      <string>Morfologi</string>
@@ -245,7 +238,6 @@
    <addaction name="menuImage_Processing"/>
    <addaction name="menuAritmatical_Operation"/>
    <addaction name="menuFilter"/>
-   <addaction name="menuEdge_Detection_2"/>
    <addaction name="menuMorfologi"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -456,17 +448,17 @@
   </action>
   <action name="actionEdge_Detection_1">
    <property name="text">
-    <string>Edge Detection 1</string>
+    <string>Sobel</string>
    </property>
   </action>
   <action name="actionEdge_Detection_2">
    <property name="text">
-    <string>Edge Detection 2</string>
+    <string>Prewitt</string>
    </property>
   </action>
   <action name="actionEdge_Detection_3">
    <property name="text">
-    <string>Edge Detection 3</string>
+    <string>Canny</string>
    </property>
   </action>
   <action name="actionGaussian_Blur_3x3">
@@ -477,16 +469,6 @@
   <action name="actionGaussian_Blur_5x5">
    <property name="text">
     <string>Gaussian Blur 5x5</string>
-   </property>
-  </action>
-  <action name="actionPrewitt">
-   <property name="text">
-    <string>Prewitt</string>
-   </property>
-  </action>
-  <action name="actionSobel">
-   <property name="text">
-    <string>Sobel</string>
    </property>
   </action>
   <action name="actionSquare_3">

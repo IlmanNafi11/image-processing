@@ -163,6 +163,12 @@ class ArithmeticDialog(QDialog):
                 result = ops.multiply_images(input1_arr, input2_arr)
             elif operation == "Divide":
                 result = ops.divide_images(input1_arr, input2_arr)
+            elif operation == "AND":
+                result = ops.bitwise_and_images(input1_arr, input2_arr)
+            elif operation == "OR":
+                result = ops.bitwise_or_images(input1_arr, input2_arr)
+            elif operation == "XOR":
+                result = ops.bitwise_xor_images(input1_arr, input2_arr)
             else:
                 QMessageBox.warning(self, 'Error', f'Unknown operation: {operation}')
                 return
